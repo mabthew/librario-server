@@ -9,8 +9,10 @@ const passport = require("passport");
 const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
 
-// Load User model
+// Load models
 const User = require("../../models/User");
+const Books = require("../../models/Books");
+
 
 // @route POST api/users/register
 // @desc Register user
@@ -42,7 +44,18 @@ router.post("/register", (req, res) => {
           newUser.password = hash;
           newUser
             .save()
-            .then(user => res.json(user))
+            .then((user) => {
+              console.log(user)
+              const newBooks = new Books({
+                user_id: user._id,
+                books: []
+              })
+              newBooks
+                .save()
+                .then((books) => {
+                  res.json(user)
+                })
+            })
             .catch(err => console.log(err));
         });
       });
@@ -103,6 +116,19 @@ router.post("/login", (req, res) => {
           .json({ passwordincorrect: "Password incorrect" });
       }
     });
+  });
+});
+
+// @route GET api/users/books
+// @desc Retreive a users' book list
+// @access Private
+router.get("/books", (req, res) => {
+  Books.findOne({ user_id: req.query.user_id }).then(user => {
+    if (!user) {
+      return res.status(400).json({ email: "No books found for user" });
+    } else {
+      res.json(user.books)
+    }
   });
 });
 
