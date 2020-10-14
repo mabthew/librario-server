@@ -45,7 +45,6 @@ router.post("/register", (req, res) => {
           newUser
             .save()
             .then((user) => {
-              console.log(user)
               const newBooks = new Books({
                 user_id: user._id,
                 books: []
@@ -131,5 +130,19 @@ router.get("/books", (req, res) => {
     }
   });
 });
+
+// @route GET api/users/account_info
+// @desc Retreive a users' account info
+// @access Private
+router.get("/account_info", (req, res) => {
+  User.findOne({ _id: req.query.user_id }).then(user => {
+    if (!user) {
+      return res.status(400).json({ email: "No info found for user" });
+    } else {
+      res.json(user)
+    }
+  });
+});
+
 
 module.exports = router;
